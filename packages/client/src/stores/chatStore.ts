@@ -9,6 +9,7 @@ export interface User {
   username: string;
   displayName: string;
   avatar: string | null;
+  bio: string | null;
   status: string;
   createdAt: string;
 }

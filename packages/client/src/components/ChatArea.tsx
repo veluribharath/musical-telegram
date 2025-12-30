@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuthStore } from '../stores/authStore';
-import { useChatStore, Message } from '../stores/chatStore';
+import { useChatStore, Message, User } from '../stores/chatStore';
 import { format, isToday, isYesterday, isSameDay } from 'date-fns';
+import { UserProfileView } from './UserProfileView';
 
 export function ChatArea() {
   const { user } = useAuthStore();
@@ -16,6 +17,7 @@ export function ChatArea() {
 
   const [inputValue, setInputValue] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [viewingUser, setViewingUser] = useState<User | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
@@ -117,13 +119,25 @@ export function ChatArea() {
     ? `${currentConversation.members.length} members`
     : otherMember?.status || 'offline';
 
+  const handleViewProfile = (memberToView: User) => {
+    setViewingUser(memberToView);
+  };
+
   return (
     <div className="chat-area">
-      <div className="chat-header">
-        <div className="conversation-avatar">
-          {currentConversation.isGroup
-            ? currentConversation.name?.[0] || 'G'
-            : otherMember?.displayName?.[0]?.toUpperCase() || '?'}
+      <div 
+        className={`chat-header ${!currentConversation.isGroup ? 'clickable' : ''}`}
+        onClick={() => !currentConversation.isGroup && otherMember && handleViewProfile(otherMember)}
+      >
+        <div 
+          className="conversation-avatar"
+          style={!currentConversation.isGroup && otherMember?.avatar ? { backgroundImage: `url(${otherMember.avatar})`, backgroundSize: 'cover' } : {}}
+        >
+          {!(otherMember?.avatar && !currentConversation.isGroup) && (
+            currentConversation.isGroup
+              ? currentConversation.name?.[0] || 'G'
+              : otherMember?.displayName?.[0]?.toUpperCase() || '?'
+          )}
           {!currentConversation.isGroup && (
             <span className={`status-indicator ${otherMember?.status || 'offline'}`} />
           )}
@@ -246,6 +260,11 @@ export function ChatArea() {
           </button>
         </form>
       </div>
+
+      {/* User Profile View Modal */}
+      {viewingUser && (
+        <UserProfileView user={viewingUser} onClose={() => setViewingUser(null)} />
+      )}
     </div>
   );
 }

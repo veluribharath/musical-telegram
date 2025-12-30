@@ -7,7 +7,7 @@ import path from 'path';
 import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 
-import { register, login, verifyToken, getUserById, updateUserStatus, searchUsers, User } from './auth';
+import { register, login, verifyToken, getUserById, updateUserStatus, updateUserProfile, searchUsers, User } from './auth';
 import {
   createConversation,
   getUserConversations,
@@ -25,7 +25,7 @@ const wss = new WebSocketServer({ server });
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
 // File uploads
 const uploadsDir = path.join(__dirname, '..', 'uploads');
@@ -106,6 +106,22 @@ app.get('/api/auth/me', authMiddleware, (req, res) => {
     res.json({ user });
   } else {
     res.status(404).json({ error: 'User not found' });
+  }
+});
+
+app.put('/api/auth/profile', authMiddleware, (req, res) => {
+  const { displayName, avatar, bio } = req.body;
+  const userId = (req as any).userId;
+
+  if (!displayName) {
+    return res.status(400).json({ error: 'Display name is required' });
+  }
+
+  const user = updateUserProfile(userId, { displayName, avatar, bio });
+  if (user) {
+    res.json({ user });
+  } else {
+    res.status(500).json({ error: 'Failed to update profile' });
   }
 });
 

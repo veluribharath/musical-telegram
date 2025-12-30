@@ -10,6 +10,7 @@ export interface User {
   username: string;
   displayName: string;
   avatar: string | null;
+  bio: string | null;
   status: string;
   createdAt: string;
 }
@@ -38,6 +39,7 @@ export function register(username: string, password: string, displayName: string
       password: hashedPassword,
       displayName,
       avatar: null,
+      bio: null,
       status: 'online',
       createdAt: now,
     });
@@ -47,6 +49,7 @@ export function register(username: string, password: string, displayName: string
       username,
       displayName,
       avatar: null,
+      bio: null,
       status: 'online',
       createdAt: now,
     };
@@ -80,6 +83,7 @@ export function login(username: string, password: string): AuthResult {
       username: dbUser.username,
       displayName: dbUser.displayName,
       avatar: dbUser.avatar,
+      bio: dbUser.bio || null,
       status: 'online',
       createdAt: dbUser.createdAt,
     };
@@ -111,6 +115,7 @@ export function getUserById(id: string): User | null {
     username: dbUser.username,
     displayName: dbUser.displayName,
     avatar: dbUser.avatar,
+    bio: dbUser.bio || null,
     status: dbUser.status,
     createdAt: dbUser.createdAt,
   };
@@ -120,6 +125,11 @@ export function updateUserStatus(userId: string, status: string): void {
   database.updateUser(userId, { status });
 }
 
+export function updateUserProfile(userId: string, updates: { displayName?: string; avatar?: string; bio?: string }): User | null {
+  database.updateUser(userId, updates);
+  return getUserById(userId);
+}
+
 export function searchUsers(query: string, excludeUserId: string): User[] {
   const users = database.searchUsers(query, excludeUserId);
   return users.map(u => ({
@@ -127,6 +137,7 @@ export function searchUsers(query: string, excludeUserId: string): User[] {
     username: u.username,
     displayName: u.displayName,
     avatar: u.avatar,
+    bio: u.bio || null,
     status: u.status,
     createdAt: u.createdAt,
   }));

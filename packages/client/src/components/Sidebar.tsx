@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuthStore } from '../stores/authStore';
 import { useChatStore, Conversation, User } from '../stores/chatStore';
 import { formatDistanceToNow } from 'date-fns';
+import { Profile } from './Profile';
 
 export function Sidebar() {
   const { user, logout } = useAuthStore();
@@ -16,6 +17,7 @@ export function Sidebar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showNewChat, setShowNewChat] = useState(false);
   const [showNewGroup, setShowNewGroup] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
   const [userSearchQuery, setUserSearchQuery] = useState('');
   const [userSearchResults, setUserSearchResults] = useState<User[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
@@ -90,7 +92,14 @@ export function Sidebar() {
       <div className="sidebar-header">
         <h2>ChatterBox</h2>
         <div className="user-info">
-          <div className="user-avatar">{user?.displayName?.[0]?.toUpperCase()}</div>
+          <div 
+            className="user-avatar clickable"
+            onClick={() => setShowProfile(true)}
+            style={user?.avatar ? { backgroundImage: `url(${user.avatar})`, backgroundSize: 'cover' } : {}}
+            title="View Profile"
+          >
+            {!user?.avatar && user?.displayName?.[0]?.toUpperCase()}
+          </div>
           <button className="btn btn-secondary" onClick={logout} style={{ padding: '6px 12px', fontSize: '12px' }}>
             Logout
           </button>
@@ -260,6 +269,9 @@ export function Sidebar() {
           </div>
         </div>
       )}
+
+      {/* Profile Modal */}
+      {showProfile && <Profile onClose={() => setShowProfile(false)} />}
     </div>
   );
 }

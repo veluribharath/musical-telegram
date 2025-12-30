@@ -8,8 +8,15 @@ export interface User {
   username: string;
   displayName: string;
   avatar: string | null;
+  bio: string | null;
   status: string;
   createdAt: string;
+}
+
+interface ProfileUpdate {
+  displayName?: string;
+  avatar?: string;
+  bio?: string;
 }
 
 interface AuthState {
@@ -22,6 +29,7 @@ interface AuthState {
   logout: () => void;
   clearError: () => void;
   checkAuth: () => Promise<void>;
+  updateProfile: (updates: ProfileUpdate) => Promise<{ success: boolean; error?: string }>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -106,6 +114,33 @@ export const useAuthStore = create<AuthState>()(
           set({ user: data.user });
         } catch {
           set({ user: null, token: null });
+        }
+      },
+
+      updateProfile: async (updates: ProfileUpdate) => {
+        const { token } = get();
+        if (!token) return { success: false, error: 'Not authenticated' };
+
+        try {
+          const response = await fetch(`${API_URL}/api/auth/profile`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(updates),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            return { success: false, error: data.error || 'Update failed' };
+          }
+
+          set({ user: data.user });
+          return { success: true };
+        } catch (error) {
+          return { success: false, error: 'Connection failed' };
         }
       },
     }),

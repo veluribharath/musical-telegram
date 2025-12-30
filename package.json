@@ -1,0 +1,20 @@
+{
+  "name": "chatterbox",
+  "version": "1.0.0",
+  "description": "A desktop chat application for talking with friends",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "npm run dev --workspace=@chatterbox/server",
+    "dev:client": "npm run dev --workspace=@chatterbox/client",
+    "build": "npm run build --workspaces",
+    "start:server": "npm run start --workspace=@chatterbox/server"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "typescript": "^5.3.3"
+  }
+}
